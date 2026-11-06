@@ -1,0 +1,26 @@
+---
+- name: Baseline de servidores
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Instalar paquetes base
+      ansible.builtin.dnf:
+        name:
+          - vim-enhanced
+          - tmux
+          - nfs-utils
+          - cifs-utils
+        state: present
+
+    - name: Crear usuario de servicio dbadmin
+      ansible.builtin.user:
+        name: dbadmin
+        shell: /bin/bash
+        comment: "Database admin"
+
+    - name: Configurar motd
+      ansible.builtin.copy:
+        dest: /etc/motd
+        content: "Servidor gestionado por Ansible - {{ inventory_hostname }}\n"
+        mode: "0644"

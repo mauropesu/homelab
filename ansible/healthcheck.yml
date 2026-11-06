@@ -1,0 +1,30 @@
+---
+- name: Desplegar healthcheck
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Instalar cronie
+      ansible.builtin.dnf:
+        name: cronie
+        state: present
+
+    - name: Asegurar crond activo
+      ansible.builtin.systemd:
+        name: crond
+        state: started
+        enabled: true
+
+    - name: Copiar script de healthcheck
+      ansible.builtin.copy:
+        src: files/healthcheck.sh
+        dest: /usr/local/bin/healthcheck.sh
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Programar healthcheck cada 5 minutos
+      ansible.builtin.cron:
+        name: "healthcheck"
+        minute: "*/5"
+        job: "/usr/local/bin/healthcheck.sh >> /var/log/healthcheck.log 2>&1"
